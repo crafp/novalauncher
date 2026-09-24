@@ -16,9 +16,9 @@ Un launcher personnel pour regrouper tes jeux Windows, tes plateformes (Steam, E
 - **Recherche automatique de jaquettes** : un bouton "🖼️ Chercher les jaquettes manquantes" télécharge automatiquement les jaquettes de tes jeux Steam et de tes jeux émulés reconnus (voir section dédiée plus bas)
 - Toutes les données restent en local sur ta machine (fichier JSON + dossier d'images dans ton dossier utilisateur), rien n'est envoyé en ligne (sauf la recherche de jaquettes, qui interroge deux sources publiques précises — détail ci-dessous)
 
-## Installation (pour tester / développer)
+## Installation 
 
-Prérequis : [Node.js](https://nodejs.org/) (version LTS, 18 ou plus récent) installé sur ton PC Windows.
+Prérequis : [Node.js](https://nodejs.org/) (version LTS, 18 ou plus récent).
 
 1. Décompresse ce dossier où tu veux (ex: `C:\Projets\NovaLauncher`)
 2. Ouvre un terminal (PowerShell) dans ce dossier

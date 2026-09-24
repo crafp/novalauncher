@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' file: data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+<title>NovaLauncher</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">N</div>
+      <div class="brand-text">
+        <strong>NovaLauncher</strong>
+        <span>ta ludothèque</span>
+      </div>
+    </div>
+
+    <button class="btn-add" id="btnAdd">
+      <span class="plus">+</span> Ajouter un jeu / une app
+    </button>
+
+    <div class="search-wrap">
+      <input id="search" type="text" placeholder="Rechercher..." autocomplete="off" />
+    </div>
+
+    <nav class="categories" id="categoryNav">
+      <button class="cat-item active" data-cat="all">
+        <span class="cat-icon">🏠</span> Tous <span class="count" id="count-all">0</span>
+      </button>
+      <button class="cat-item" data-cat="favorites">
+        <span class="cat-icon">⭐</span> Favoris <span class="count" id="count-favorites">0</span>
+      </button>
+      <button class="cat-item" data-cat="steam">
+        <span class="cat-icon">🎮</span> Steam <span class="count" id="count-steam">0</span>
+      </button>
+      <button class="cat-item" data-cat="epic">
+        <span class="cat-icon">🚀</span> Epic Games <span class="count" id="count-epic">0</span>
+      </button>
+      <button class="cat-item" data-cat="emulator">
+        <span class="cat-icon">🕹️</span> Émulateurs <span class="count" id="count-emulator">0</span>
+      </button>
+      <button class="cat-item" data-cat="app">
+        <span class="cat-icon">🖥️</span> Applications <span class="count" id="count-app">0</span>
+      </button>
+      <button class="cat-item" data-cat="other">
+        <span class="cat-icon">📦</span> Autres <span class="count" id="count-other">0</span>
+      </button>
+    </nav>
+
+    <button class="btn-settings" id="btnEmulation">🕹️ Émulation (RetroArch)</button>
+    <button class="btn-settings" id="btnSettings">⚙️ Paramètres</button>
+  </aside>
+
+  <main class="main">
+
+    <section class="hero" id="hero">
+      <div class="hero-backdrop" id="heroBackdrop"></div>
+      <div class="hero-scrim"></div>
+      <div class="hero-content">
+        <div class="hero-badge" id="heroBadge">Bienvenue</div>
+        <h1 id="heroTitle">NovaLauncher</h1>
+        <p id="heroSubtitle">Ajoute tes jeux Steam, Epic Games, tes émulateurs et tes applications pour tout lancer depuis un seul endroit.</p>
+        <div class="hero-actions" id="heroActions"></div>
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <h2 id="sectionTitle">Tous</h2>
+      <span class="section-count" id="sectionCount"></span>
+      <div class="toolbar-spacer"></div>
+      <button class="btn-secondary btn-small" id="btnAutoCovers">🖼️ Chercher les jaquettes manquantes</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="empty-state" id="emptyState" hidden>
+      <div class="empty-icon">🎮</div>
+      <h3 id="emptyTitle">Ta bibliothèque est vide</h3>
+      <p id="emptyText">Ajoute ton premier jeu, ta plateforme ou ton application pour commencer.</p>
+      <button class="btn-add btn-add-empty" id="btnAddEmpty">+ Ajouter maintenant</button>
+    </div>
+
+  </main>
+</div>
+
+<!-- Drop overlay -->
+<div class="drop-overlay" id="dropOverlay">
+  <div class="drop-card">📥 Dépose le fichier ici pour l'ajouter</div>
+</div>
+
+<!-- Modale ajout / édition -->
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Ajouter un jeu</h2>
+      <button class="icon-btn" id="modalClose">✕</button>
+    </div>
+    <form id="gameForm">
+      <div class="field">
+        <label for="fieldName">Nom</label>
+        <input id="fieldName" type="text" placeholder="Ex : Elden Ring" required />
+      </div>
+
+      <div class="field">
+        <label for="fieldCategory">Catégorie</label>
+        <select id="fieldCategory">
+          <option value="steam">🎮 Steam</option>
+          <option value="epic">🚀 Epic Games</option>
+          <option value="emulator">🕹️ Émulateur</option>
+          <option value="app">🖥️ Application</option>
+          <option value="other">📦 Autre</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="fieldTarget">Exécutable ou lien</label>
+        <div class="field-row">
+          <input id="fieldTarget" type="text" placeholder="C:\Jeux\jeu.exe ou steam://rungameid/12345" required />
+          <button type="button" class="btn-secondary" id="btnBrowseExe">Parcourir</button>
+        </div>
+        <p class="hint">Pour Steam : <code>steam://rungameid/APPID</code> — pour Epic : <code>com.epicgames.launcher://apps/NOM?action=launch&amp;silent=true</code></p>
+      </div>
+
+      <div class="field">
+        <label for="fieldArgs">Arguments de lancement (optionnel)</label>
+        <input id="fieldArgs" type="text" placeholder="--fullscreen" />
+      </div>
+
+      <div class="field">
+        <label>Image de couverture (optionnel)</label>
+        <div class="cover-picker">
+          <div class="cover-preview" id="coverPreview">
+            <span id="coverPreviewLetter">?</span>
+          </div>
+          <div class="cover-picker-actions">
+            <button type="button" class="btn-secondary" id="btnBrowseImage">Choisir une image</button>
+            <button type="button" class="btn-ghost" id="btnClearImage">Retirer</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-danger" id="btnDeleteGame" hidden>Supprimer</button>
+        <div class="spacer"></div>
+        <button type="button" class="btn-ghost" id="btnCancelModal">Annuler</button>
+        <button type="submit" class="btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modale paramètres -->
+<div class="modal-overlay" id="settingsOverlay" hidden>
+  <div class="modal modal-settings">
+    <div class="modal-header">
+      <h2>Paramètres</h2>
+      <button class="icon-btn" id="settingsClose">✕</button>
+    </div>
+    <div class="field">
+      <label>Couleur d'accent</label>
+      <div class="accent-picker" id="accentPicker">
+        <button data-accent="violet" style="--sw:#8b5cf6"></button>
+        <button data-accent="cyan" style="--sw:#22d3ee"></button>
+        <button data-accent="rose" style="--sw:#f472b6"></button>
+        <button data-accent="vert" style="--sw:#34d399"></button>
+        <button data-accent="orange" style="--sw:#fb923c"></button>
+      </div>
+    </div>
+    <div class="field field-inline">
+      <label for="toggleMinimize">Réduire NovaLauncher au lancement d'un jeu</label>
+      <input type="checkbox" id="toggleMinimize" />
+    </div>
+    <p class="hint">Bibliothèque stockée localement sur ta machine (aucune donnée envoyée en ligne).</p>
+  </div>
+</div>
+
+<!-- Modale émulation (RetroArch) -->
+<div class="modal-overlay" id="emulationOverlay" hidden>
+  <div class="modal modal-emulation">
+    <div class="modal-header">
+      <h2>🕹️ Émulation (RetroArch)</h2>
+      <button class="icon-btn" id="emulationClose">✕</button>
+    </div>
+
+    <p class="hint">Installe et configure RetroArch toi-même (avec les cœurs que tu veux), indique juste son chemin ici : NovaLauncher détecte tes cœurs et scanne tes dossiers de ROMs pour créer automatiquement toutes tes tuiles de jeux.</p>
+
+    <div class="field">
+      <label for="retroarchPath">Chemin de RetroArch (retroarch.exe)</label>
+      <div class="field-row">
+        <input id="retroarchPath" type="text" placeholder="C:\RetroArch-Win64\retroarch.exe" readonly />
+        <button type="button" class="btn-secondary" id="btnBrowseRetroarch">Parcourir</button>
+      </div>
+      <p class="hint" id="coresStatus">Configure le chemin de RetroArch pour détecter tes cœurs.</p>
+    </div>
+
+    <div class="field">
+      <div class="field-row-header">
+        <label>Consoles configurées</label>
+        <button type="button" class="btn-secondary btn-small" id="btnAddConsole">+ Ajouter une console</button>
+      </div>
+      <div id="consoleList" class="console-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Menu contextuel -->
+<div class="context-menu" id="contextMenu" hidden>
+  <button data-action="launch">▶️ Lancer</button>
+  <button data-action="favorite">⭐ Favoris</button>
+  <button data-action="find-cover">🖼️ Chercher une jaquette</button>
+  <button data-action="edit">✏️ Modifier</button>
+  <button data-action="folder">📁 Ouvrir le dossier</button>
+  <button data-action="delete" class="danger">🗑️ Supprimer</button>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>
